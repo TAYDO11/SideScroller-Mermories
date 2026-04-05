@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement2D : MonoBehaviour
@@ -26,6 +27,7 @@ public class PlayerMovement2D : MonoBehaviour
     [HideInInspector] public bool dashUnlocked = false;
 
     private Rigidbody2D rb;
+    private SpriteRenderer sr;
     private float horizontalInput;
     private bool isGrounded;
     private bool jumpRequested;
@@ -37,6 +39,8 @@ public class PlayerMovement2D : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
+        cooldownTimer = 0f;
     }
 
     void Update()
@@ -48,18 +52,23 @@ public class PlayerMovement2D : MonoBehaviour
         if (Input.GetButtonDown("Jump") && isGrounded)
             jumpRequested = true;
 
-        // Dash (Ctrl, seulement si item équipé)
-        if (dashUnlocked && Input.GetKeyDown(KeyCode.LeftControl) && cooldownTimer <= 0f && !isDashing)
-            dashRequested = true;
+       
 
-        // Flip du sprite
-        if (horizontalInput > 0)
-            transform.localScale = new Vector3(1, 1, 1);
-        else if (horizontalInput < 0)
-            transform.localScale = new Vector3(-1, 1, 1);
+        // Dash (Ctrl, seulement si item équipé)
+        if (dashUnlocked && Input.GetKeyDown(KeyCode.E) && cooldownTimer <= 0f && !isDashing)
+        {
+            dashRequested = true;
+        }
+
+        // Flip du sprite (sans toucher au scale pour éviter les warnings collider)
+        if (horizontalInput > 0 && sr != null)
+            sr.flipX = false;
+        else if (horizontalInput < 0 && sr != null)
+            sr.flipX = true;
 
         // Animator
-        animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
+        if (animator != null)
+            animator.SetFloat("Speed", Mathf.Abs(rb.linearVelocity.x));
     }
 
     void FixedUpdate()
@@ -72,7 +81,7 @@ public class PlayerMovement2D : MonoBehaviour
             cooldownTimer = dashCooldown;
             dashRequested = false;
 
-            float dir = horizontalInput != 0 ? horizontalInput : transform.localScale.x;
+            float dir = horizontalInput != 0 ? horizontalInput : (sr != null && sr.flipX ? -1f : 1f);
             rb.linearVelocity = new Vector2(dir * dashForce, 0f);
         }
 
@@ -83,7 +92,7 @@ public class PlayerMovement2D : MonoBehaviour
             return;
         }
 
-        // Cooldown
+        // Cooldown dash
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.fixedDeltaTime;
 

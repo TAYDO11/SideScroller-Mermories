@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 
+// Ajoute ce composant sur ton PERSONNAGE
 public class HeldItemManager : MonoBehaviour
 {
     [Header("Référence main")]
@@ -9,7 +10,16 @@ public class HeldItemManager : MonoBehaviour
 
     private GameObject currentHeldItem;
     private ItemAuraController currentAura;
+    private ItemPowerController powerController;
+    private ItemFlightController currentFlight;
+    private SpriteRenderer playerSprite;
     private int currentSlot = -1;
+
+    void Start()
+    {
+        powerController = GetComponent<ItemPowerController>();
+        playerSprite = GetComponent<SpriteRenderer>();
+    }
 
     void Update()
     {
@@ -21,15 +31,14 @@ public class HeldItemManager : MonoBehaviour
                 SelectSlot(i);
                 return;
             }
+        }
 
-            if(currentHeldItem != null)
-            {
-                SpriteRenderer playerSprite = GetComponent<SpriteRenderer>();
-                SpriteRenderer itemSprite = currentHeldItem.GetComponent<SpriteRenderer>();
-                if (playerSprite != null && itemSprite != null)
-                    itemSprite.flipX = playerSprite.flipX;
-            }
-
+        // Flip de l'item avec le sprite du personnage
+        if (currentHeldItem != null && playerSprite != null)
+        {
+            SpriteRenderer itemSprite = currentHeldItem.GetComponent<SpriteRenderer>();
+            if (itemSprite != null)
+                itemSprite.flipX = playerSprite.flipX;
         }
 
         // Manette PS : L1 + X = slot 0, L1 + carré = slot 1
@@ -45,14 +54,13 @@ public class HeldItemManager : MonoBehaviour
 
     public void SelectSlot(int index)
     {
-        // Vérifie que l'item est dans l'inventaire
         if (!inventory.instance.HasItemInSlot(index))
         {
             Debug.Log("Slot " + index + " vide.");
             return;
         }
 
-        // Toggle
+        // Toggle : déséquipe si on rappuie sur le même slot
         if (currentSlot == index)
         {
             UnequipItem();
@@ -61,7 +69,6 @@ public class HeldItemManager : MonoBehaviour
 
         Item item = inventory.instance.GetItemInSlot(index);
 
-        // Vérifie qu'un prefab est assigné sur l'item
         if (item.heldPrefab == null)
         {
             Debug.LogWarning("Pas de heldPrefab sur l'item " + index);
@@ -76,6 +83,8 @@ public class HeldItemManager : MonoBehaviour
         if (currentHeldItem != null)
         {
             if (currentAura != null) currentAura.DisableAura();
+            if (powerController != null) powerController.DisablePowers();
+            if (currentFlight != null) currentFlight.DisableFlight();
             Destroy(currentHeldItem);
         }
 
@@ -84,8 +93,20 @@ public class HeldItemManager : MonoBehaviour
         currentHeldItem.transform.SetParent(handTransform);
         currentHeldItem.transform.localPosition = Vector3.zero;
 
+        // --- Pouvoir LUMIERE ---
         currentAura = currentHeldItem.GetComponent<ItemAuraController>();
-        if (currentAura != null) StartCoroutine(EnableAuraNextFrame(currentAura));
+        if (currentAura != null)
+            StartCoroutine(EnableAuraNextFrame(currentAura));
+
+        // --- Pouvoir DASH + COURSE ---
+        ItemGrantsPowers grants = currentHeldItem.GetComponent<ItemGrantsPowers>();
+        if (grants != null && grants.grantsDashAndRun && powerController != null)
+            powerController.EnablePowers();
+
+        // --- Pouvoir VOL ---
+        currentFlight = currentHeldItem.GetComponent<ItemFlightController>();
+        if (currentFlight != null)
+            currentFlight.EnableFlight();
     }
 
     IEnumerator EnableAuraNextFrame(ItemAuraController aura)
@@ -97,9 +118,13 @@ public class HeldItemManager : MonoBehaviour
     public void UnequipItem()
     {
         if (currentAura != null) currentAura.DisableAura();
+        if (powerController != null) powerController.DisablePowers();
+        if (currentFlight != null) currentFlight.DisableFlight();
         if (currentHeldItem != null) Destroy(currentHeldItem);
+
         currentHeldItem = null;
         currentAura = null;
+        currentFlight = null;
         currentSlot = -1;
     }
 }

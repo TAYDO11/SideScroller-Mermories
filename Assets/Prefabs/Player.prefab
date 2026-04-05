@@ -212,8 +212,9 @@ GameObject:
   - component: {fileID: 2415269017400848436}
   - component: {fileID: 3739493973155215104}
   - component: {fileID: 3652645598022923555}
-  - component: {fileID: 4125071032133901167}
-  - component: {fileID: 3743282977171316408}
+  - component: {fileID: 2437510054303927090}
+  - component: {fileID: 2083734203853388967}
+  - component: {fileID: 5779152506936957807}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -392,7 +393,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4125071032133901167
+--- !u!114 &2437510054303927090
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -401,13 +402,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 8513926310314480833}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85f6cdb02279cf741ac3299ad6b9f739, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e5b238385cbaff40b5aebda1fa0054e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemPowerController
+  runMultiplier: 4.22
+--- !u!114 &2083734203853388967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8513926310314480833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53962a7c1be9eab4a8500be1964381b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement2D
-  moveSpeed: 15
+  moveSpeed: 14.79
   groundAcceleration: 15
-  jumpForce: 10
   airAcceleration: 4
+  jumpForce: 10
   groundCheck: {fileID: 6102358509725077320}
   groundCheckRadius: 0.2
   groundLayer:
@@ -415,9 +429,11 @@ MonoBehaviour:
     m_Bits: 8
   dashForce: 15
   dashDuration: 0.15
-  dashCooldown: 5
+  dashCooldown: 1
   animator: {fileID: 3652645598022923555}
---- !u!114 &3743282977171316408
+  speedMultiplier: 1
+  dashUnlocked: 0
+--- !u!114 &5779152506936957807
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
